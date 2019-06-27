@@ -80,7 +80,7 @@ class UI {
             this.itemID++;
             this.itemList.push(expense);
             this.addExpense(expense);
-            //Show Balance em construção
+            this.showBalance();
 
         }
     }
@@ -104,9 +104,56 @@ class UI {
         this.expenseList.appendChild(div);
     }
     totalExpense() {
-        //valor temporário pois falta mais coisas no projeto.
-        let total = 400;
+        let total = 0;
+        if (this.itemList.length > 0) {
+            total = this.itemList.reduce(function (acc, curr) {
+                acc += curr.amount;
+                return acc;
+            }, 0);
+        }
+        this.expenseAmount.textContent = total;
         return total;
+    }
+
+    editExpense(element) {
+        //pegar ID do expense.id
+        let id = parseInt(element.dataset.id);
+        //escalar os "pais" até chegar no elemento que queremos.
+        let parent = element.parentElement.parentElement.parentElement;
+
+        //remove de dom
+        this.expenseList.removeChild(parent);
+        //remove da lista
+        let expense = this.itemList.filter(function (item) {
+            return item.id === id;
+        });
+        //mostrar valor dentro do input para indicar que valor original está sendo alterado
+        this.expenseInput.value = expense[0].title;
+        this.amountInput.value = expense[0].amount;
+
+        //remove da Lista
+        let tempList = this.itemList.filter(function (item) {
+            return item.id !== id;
+        });
+        this.itemList = tempList;
+        this.showBalance();
+    }
+
+    deleteExpense(element) {
+        //pegar ID do expense.id
+        let id = parseInt(element.dataset.id);
+        //escalar os "pais" até chegar no elemento que queremos.
+        let parent = element.parentElement.parentElement.parentElement;
+
+        //remove de dom
+        this.expenseList.removeChild(parent);
+
+        //remove da Lista
+        let tempList = this.itemList.filter(function (item) {
+            return item.id !== id;
+        });
+        this.itemList = tempList;
+        this.showBalance();
     }
 }
 
@@ -130,7 +177,12 @@ function eventListenters() {
     })
     //expense click 
     expenseList.addEventListener('click', function (event) {
-
+        if (event.target.parentElement.classList.contains('edit-icon')) {
+            ui.editExpense(event.target.parentElement);
+        }
+        else if (event.target.parentElement.classList.contains('delete-icon')) {
+            ui.deleteExpense(event.target.parentElement);
+        }
     })
 
 }
